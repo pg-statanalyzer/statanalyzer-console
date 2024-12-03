@@ -117,7 +117,9 @@ public class Main {
                 .desc("print this message").build());
 
         opt.addOption(Option.builder("m").longOpt("modality").hasArg()
-                .desc("sample type: multimodal").build());
+                .desc("sample type:\n" +
+                        "uni (Unimodal)\n" +
+                        "multi (Multimodal)").build());
 
         opt.addOption(Option.builder("c").longOpt("criteria").hasArg()
                 .desc("criteria type:\n" +
@@ -136,14 +138,43 @@ public class Main {
         config = new Configuration();
         try {
             CommandLine cmd = new DefaultParser().parse(opt, args);
+            HelpFormatter formatter = new HelpFormatter();
+            String usage = "java -jar statanalyzercli.jar [options] file...";
 
-            config.modality = Configuration.Modality.valueOf(cmd.getOptionValue("m", DEFMODALITY).toUpperCase());
-            config.criteria = Configuration.TestCriteria.valueOf(cmd.getOptionValue("c", DEFTEST).toUpperCase());
-            config.estimator = Configuration.ParamsEstimator.valueOf(cmd.getOptionValue("e", DEFESTIMATOR).toUpperCase());
+            if (cmd.hasOption("h")) {
+                formatter.printHelp(usage, opt);
+                System.exit(0);
+            }
+
+            try {
+                config.modality = Configuration.Modality.valueOf(cmd.getOptionValue("m", DEFMODALITY).toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println(String.format("Invalid modality specified \"%s\"\n", cmd.getOptionValue("m")));
+                formatter.printHelp(usage, opt);
+                System.exit(0);
+            }
+
+            try {
+                config.criteria = Configuration.TestCriteria.valueOf(cmd.getOptionValue("c", DEFTEST).toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println(String.format("Invalid criteria specified \"%s\"\n", cmd.getOptionValue("c")));
+                formatter.printHelp(usage, opt);
+                System.exit(0);
+
+            }
+
+            try {
+                config.estimator = Configuration.ParamsEstimator.valueOf(cmd.getOptionValue("e", DEFESTIMATOR).toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println(String.format("Invalid estimator specified \"%s\"\n", cmd.getOptionValue("e")));
+                formatter.printHelp(usage, opt);
+                System.exit(0);
+            }
 
             if (cmd.getArgList().isEmpty()) {
-                System.err.println("Filename is not specified");
-                throw new IllegalArgumentException();
+                System.out.println("Filename is not specified\n");
+                formatter.printHelp(usage, opt);
+                System.exit(0);
             }
             config.filename = cmd.getArgList().get(0);
         } catch (ParseException e) {
