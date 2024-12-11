@@ -10,6 +10,12 @@ public class Configuration {
     public ParamsEstimator estimator;
     public String filename;
 
+    public double division;
+    public double sensitivity;
+    public double precision;
+
+    public boolean verbose;
+
 
     public enum Modality {
         UNI,
