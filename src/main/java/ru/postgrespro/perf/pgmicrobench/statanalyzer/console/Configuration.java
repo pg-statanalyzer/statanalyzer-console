@@ -27,7 +27,7 @@ public class Configuration {
         CVM(new CramerVonMises()),
         KS(new KolmogorovSmirnov()),
         PEARSON(new Pearson()),
-        MULTI(null);
+        MULTI(new Multicriteria());
 
         @Getter
         private final IDistributionTest criteria;
@@ -39,7 +39,7 @@ public class Configuration {
         KS(new KolmogorovSmirnov()),
         PEARSON(new Pearson()),
         MLE(new MaximumLikelihoodEstimation()),
-        MULTI(null);
+        MULTI(new Multicriteria());
 
         @Getter
         private final IParameterEstimator estimator;
