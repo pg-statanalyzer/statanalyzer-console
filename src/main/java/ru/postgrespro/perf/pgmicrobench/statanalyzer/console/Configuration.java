@@ -13,6 +13,7 @@ public class Configuration {
     public double division;
     public double sensitivity;
     public double precision;
+    public double error;
 
     public boolean verbose;
 

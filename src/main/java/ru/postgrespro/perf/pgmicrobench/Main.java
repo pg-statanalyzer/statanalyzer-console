@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 
@@ -24,6 +25,7 @@ public class Main {
     private static final double DEFSENSITIVITY = 0.5;
     private static final double DEFPRECISION = 0.01;
     private static final boolean DEFVERBOSITY = false;
+    private static final double DEFERROR = 1.0;
 
     private static Configuration config;
 
@@ -60,6 +62,21 @@ public class Main {
                     ModeReport modeReport = result.getModeReports().get(i);
 
                     System.out.println("Mode #" + (i + 1));
+
+                    if (config.error != 1.0 && modeReport.getBestDistribution().getPValue() < 1 - config.error) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("=== Mode Report (Summary) ===\n")
+                                .append(String.format(Locale.US,
+                                        "Mode bounds: [%.2f, %.2f]\n", modeReport.getLeftBound(), modeReport.getRightBound()))
+                                .append(String.format(Locale.US,
+                                        "Location: %.6f\n", modeReport.getLocation()))
+                                .append(String.format(Locale.US,
+                                        "Mode size: %d\n", modeReport.getSize()))
+                                .append("COULD NOT FIT THE DISTRIBUTION WITH DESIRED ERROR\n");
+                        System.out.println(sb.toString());
+                        continue;
+                    }
+
                     if (config.verbose) {
                         System.out.println(modeReport.toStringVerbose());
                     } else {
@@ -94,6 +111,9 @@ public class Main {
 
         opt.addOption(Option.builder().longOpt("precision").hasArg()
                 .desc("Precision of Lowland MultiModality Detector").build());
+
+        opt.addOption(Option.builder().longOpt("error").hasArg()
+                .desc("Error in pvalue of criteria").build());
 
         opt.addOption(Option.builder("c").longOpt("criteria").hasArg()
                 .desc("criteria type:\n" +
@@ -156,6 +176,19 @@ public class Main {
                 }
             } catch (NumberFormatException e) {
                 System.err.println("precision must be a double number");
+                formatter.printHelp(usage, opt);
+                System.exit(1);
+            }
+
+            try {
+                config.error = Double.parseDouble(cmd.getOptionValue("error", String.valueOf(DEFERROR)));
+                if (config.error <= 0 || config.error > 1) {
+                    System.err.println("error must be in a range from 0 to 1");
+                    formatter.printHelp(usage, opt);
+                    System.exit(1);
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("error must be a double number");
                 formatter.printHelp(usage, opt);
                 System.exit(1);
             }
