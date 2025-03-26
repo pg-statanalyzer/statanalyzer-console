@@ -6,6 +6,7 @@ import ru.postgrespro.perf.pgmicrobench.statanalyzer.ModeReport;
 import ru.postgrespro.perf.pgmicrobench.statanalyzer.Sample;
 import ru.postgrespro.perf.pgmicrobench.statanalyzer.StatAnalyzer;
 import ru.postgrespro.perf.pgmicrobench.statanalyzer.console.Configuration;
+import ru.postgrespro.perf.pgmicrobench.statanalyzer.distributions.PgCompositeDistribution;
 import ru.postgrespro.perf.pgmicrobench.statanalyzer.multimodality.LowlandModalityDetector;
 import ru.postgrespro.perf.pgmicrobench.statanalyzer.plotting.Plot;
 
@@ -53,7 +54,9 @@ public class Main {
             }
 
             case MULTI -> {
+                statAnalyzer.setUseJittering(true);
                 AnalysisResult result = statAnalyzer.analyze(dataList);
+                PgCompositeDistribution compositeDistribution = result.getCompositeDistribution();
                 System.out.printf("Found modality: %d\n", result.getModeNumber());
                 System.out.printf("Used parameter estimator: %s\n", config.estimator.getEstimator().getClass().getSimpleName());
                 System.out.printf("Used test criteria: %s\n\n", config.criteria.getCriteria().getClass().getSimpleName());
@@ -84,7 +87,7 @@ public class Main {
                     }
                 }
 
-                Plot.plot(new Sample(dataList), result.getPdf(), "Summary pdf");
+                Plot.plot(new Sample(dataList), compositeDistribution::pdf, "Summary pdf");
             }
         }
     }
