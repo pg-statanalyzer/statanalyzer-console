@@ -9,6 +9,7 @@ public class Configuration {
     public TestCriteria criteria;
     public ParamsEstimator estimator;
     public String filename;
+    public String title;
 
     public double division;
     public double sensitivity;

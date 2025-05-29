@@ -27,6 +27,7 @@ public class Main {
     private static final double DEFPRECISION = 0.01;
     private static final boolean DEFVERBOSITY = false;
     private static final double DEFERROR = 1.0;
+    private static final String DEFTITLE = "Summary PDF";
 
     private static Configuration config;
 
@@ -41,8 +42,9 @@ public class Main {
 
         List<Double> dataList = new ArrayList<>(10000);
         try (Scanner scanner = new Scanner(new File(config.filename))) {
-            while (scanner.hasNextDouble()) {
-                dataList.add(scanner.nextDouble() / config.division);
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
+                dataList.add(Double.parseDouble(line) / config.division);
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -87,7 +89,7 @@ public class Main {
                     }
                 }
 
-                Plot.plot(new Sample(dataList), compositeDistribution::pdf, "Summary pdf");
+                Plot.plot(new Sample(dataList), compositeDistribution::pdf, config.title);
             }
         }
     }
@@ -100,6 +102,9 @@ public class Main {
 
         opt.addOption(Option.builder("v").longOpt("verbose")
                 .desc("Print results for every mode and distribution").build());
+
+        opt.addOption(Option.builder("T").longOpt("title").hasArg()
+                .desc("Title of histogram").build());
 
         opt.addOption(Option.builder("m").longOpt("modality").hasArg()
                 .desc("sample type:\n" +
@@ -147,6 +152,14 @@ public class Main {
                 config.verbose = true;
             } else {
                 config.verbose = DEFVERBOSITY;
+            }
+
+            try {
+                config.title = cmd.getOptionValue("title", DEFTITLE);
+            } catch (NullPointerException e) {
+                System.err.println("Invalid title");
+                formatter.printHelp(usage, opt);
+                System.exit(1);
             }
 
             try {
